@@ -9,3 +9,4 @@ You will have to run client side server for utilizing the pdf client side code.
 2. `nodemon tools/serve` (Install nodemon, if there is an error installing the same.)
 
 
+https://docs.google.com/document/d/1Huf0HnY3kZVyDSzPKtZ7bgYoHVVrDp-2ePgGX8eSSeU/edit#
