@@ -1,0 +1,277 @@
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+<!-- <script src="./annotator/annotator.js"></script>
+<link rel = "stylesheet"
+type = "text/css"
+href = "./annotator/annotator.min.css" /> -->
+
+<script src="bundle/annotator.js"></script>
+
+<style>
+
+.textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0.2;
+  line-height: 1.0;
+}
+
+.textLayer > span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+.textLayer .highlight {
+  margin: -1px;
+  padding: 1px;
+
+  background-color: rgb(180, 0, 170);
+  border-radius: 4px;
+}
+
+.textLayer .highlight.begin {
+  border-radius: 4px 0px 0px 4px;
+}
+
+.textLayer .highlight.end {
+  border-radius: 0px 4px 4px 0px;
+}
+
+.textLayer .highlight.middle {
+  border-radius: 0px;
+}
+
+.textLayer .highlight.selected {
+  background-color: rgb(0, 100, 0);
+}
+
+.textLayer ::selection { background: rgb(0,0,255); }
+
+.textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 100%;
+  right: 0px;
+  bottom: 0px;
+  z-index: -1;
+  cursor: default;
+  user-select: none;
+}
+
+.textLayer .endOfContent.active {
+  top: 0px;
+}
+
+</style>
+
+<h1>PDF.js Previous/Next example</h1>
+
+<div>
+  <button id="prev">Previous</button>
+  <button id="next">Next</button>
+  <button id="start-drawing"> Draw/Annotate </button>
+  <button id="save-pdf"> Save PDF </button>
+  <button id="hand-tool"> Hand Tool </button>
+  <button id="add-textbox"> Add TextBox </button>
+
+  <button id="zoom-in"> Zoom In </button>
+  <button id="zoom-out"> Zoom Out </button>
+
+  &nbsp; &nbsp;
+  <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+</div>
+
+  <canvas id="the-canvas"></canvas>
+  <canvas id="custom-drawing" width="200" height="200"></canvas>
+<div id="#content">
+  <div id="text-layer" class="textLayer"></div>
+</div>
+
+  <div id="annotation-layer"></div>
+
+  <script src="bundle/annotator.js"></script>
+
+<!-- <script src="./drawing-annotation/main.js"></script> -->
+<!-- <script src="./pdfjs.js"></script> -->
+
+<script>
+
+// If absolute URL from the remote server is provided, configure the CORS
+// header on that server.
+var url = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+
+// Loaded via <script> tag, create shortcut to access PDF.js exports.
+var pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+// The workerSrc property shall be specified.
+pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+var pdfDoc = null,
+    pageNum = 1,
+    pageRendering = false,
+    pageNumPending = null,
+    scale = 2.0,
+    canvas = document.getElementById('the-canvas'),
+    ctx = canvas.getContext('2d');
+
+/**
+ * Get page info from document, resize canvas accordingly, and render page.
+ * @param num Page number.
+ */
+function renderPage(num) {
+  pageRendering = true;
+  // Using promise to fetch the page
+  pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({scale: scale});
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    // Render PDF page into canvas context
+    var renderContext = {
+      canvasContext: ctx,
+      viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+
+    // Wait for rendering to finish
+    renderTask.promise.then(function() {
+      pageRendering = false;
+      if (pageNumPending !== null) {
+        // New page rendering is pending
+        renderPage(pageNumPending);
+        pageNumPending = null;
+      }
+    });
+    applyTextSelection(page)
+  });
+
+  // Update page counters
+  document.getElementById('page_num').textContent = num;
+}
+
+/**
+ * If another page rendering in progress, waits until the rendering is
+ * finised. Otherwise, executes rendering immediately.
+ */
+function queueRenderPage(num) {
+  if (pageRendering) {
+    pageNumPending = num;
+  } else {
+    renderPage(num);
+  }
+}
+
+/**
+ * Displays previous page.
+ */
+function onPrevPage() {
+  if (pageNum <= 1) {
+    return;
+  }
+  pageNum--;
+  queueRenderPage(pageNum);
+}
+document.getElementById('prev').addEventListener('click', onPrevPage);
+
+/**
+ * Displays next page.
+ */
+function onNextPage() {
+  if (pageNum >= pdfDoc.numPages) {
+    return;
+  }
+  pageNum++;
+  queueRenderPage(pageNum);
+}
+document.getElementById('next').addEventListener('click', onNextPage);
+
+/**
+ * Asynchronously downloads PDF.
+ */
+pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+  pdfDoc = pdfDoc_;
+  document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+  // Initial/first page rendering
+  renderPage(pageNum);
+});
+
+function applyAnnotations() {
+  var app = new annotator.App();
+
+  app.include(annotator.ui.main);
+  
+  app.include(annotator.storage.http, {
+    prefix: 'http://localhost:8080/api'
+  });
+  
+  app
+  .start()
+  .then(function () {
+       app.annotations.load();
+  });  
+}
+
+function applyTextSelection(page) {
+  page.getTextContent().then(function(textContent) {
+    // PDF canvas
+    var pdf_canvas = $("#the-canvas"); 
+    var viewport = page.getViewport({scale: scale});
+
+    // Canvas offset
+    var canvas_offset = pdf_canvas.offset();
+
+    // Canvas height
+    var canvas_height = pdf_canvas.get(0).height;
+
+    // Canvas width
+    var canvas_width = pdf_canvas.get(0).width;
+
+    $("#text-layer").empty()
+
+    // Assign CSS to the text-layer element
+    $("#text-layer").css({ left: canvas_offset.left + 'px', top: canvas_offset.top + 'px', height: canvas_height + 'px', width: canvas_width + 'px' });
+
+    // Pass the data to the method for rendering of text over the pdf canvas.
+    pdfjsLib.renderTextLayer({
+        textContent: textContent,
+        container: $("#text-layer").get(0),
+        viewport: viewport,
+        textDivs: []
+    });
+
+    $("#start-drawing").click(function() {
+      $("#text-layer").is(":visible") ? $("#text-layer").hide(): $("#text-layer").show(); 
+    })
+
+    setTimeout(function() {
+      console.log("Applying annotations")
+      applyAnnotations()
+    }, 2000)
+  });
+}
+
+
+// $(document).ready(function () {
+//   // $(function ($) {
+//     $(document.body).annotator('setupPlugins', {}, {
+//       // Disable the tags plugin
+//       Tags: true,
+//       // Filter plugin options
+//       Filter: false,
+//       Auth: false,
+//     });
+//     // });
+// })
+
+
+</script>
+
