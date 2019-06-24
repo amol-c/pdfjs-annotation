@@ -1,6 +1,9 @@
 import React, {useEffect} from 'react';
 
 import {fabric} from "fabric"
+import {saveToServer} from "../Networking/Networking"
+
+let canvas
 
 export function texboxAnnotationReducer(state, action) {
   switch (action.type) {
@@ -14,12 +17,13 @@ export function texboxAnnotationReducer(state, action) {
     case 'startDrawing':
       startDrawing()
       break
+    case 'saveToServer':
+      saveToServer(canvas)
+      break
     default:
       throw new Error();
   }
 }
-
-let canvas
 
 export const TextBoxAnnotation = (props) => {
   canvas = props.fabricCanvas

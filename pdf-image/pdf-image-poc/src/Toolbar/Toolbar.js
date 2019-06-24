@@ -22,6 +22,9 @@ export const Toolbar = (props) => {
 
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "startDrawing"})}}>Start Drawing</button>
+
+      <div style={{flex: 1}}></div>
+      <button onClick={() => {annotationDispatch({type: "saveToServer"})}}>Save</button>
     </div>
   );
 }
