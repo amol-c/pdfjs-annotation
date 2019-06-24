@@ -4,6 +4,7 @@ import './App.css';
 import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
 import { TextBoxAnnotation, texboxAnnotationReducer } from "./Annotations/Textbox"
 import {fabric} from "fabric"
+import {fetchFromServer} from "./Networking/Networking"
 import $ from "jquery"
 
 function App() {
@@ -13,21 +14,28 @@ function App() {
 
   useEffect(() => {
     if(!canvas) {
-      const fabricCanvas = new fabric.Canvas('the-canvas', {
-        isDrawingMode: true
-      });
-      fabricCanvas.backgroundColor = "white"
-      fabricCanvas.freeDrawingBrush.color = "red";
-      fabricCanvas.freeDrawingBrush.width = parseInt(2, 10) || 1;
-      fabricCanvas.freeDrawingBrush.shadow = new fabric.Shadow({
-        blur: parseInt(2, 10) || 0,
-        offsetX: 0,
-        offsetY: 0,
-        affectStroke: true,
-        color: "red",
-      });
-      fabricCanvas.renderAll()
-      setCanvas(fabricCanvas) 
+      fetchFromServer().then(result => {
+        console.log(result)
+        let fabricCanvas = new fabric.Canvas('the-canvas', {
+          isDrawingMode: true
+        });
+
+        fabricCanvas = fabricCanvas.loadFromJSON({objects: result[0].objects}, () => {
+          fabricCanvas.backgroundColor = "white"
+          fabricCanvas.freeDrawingBrush.color = "red";
+          fabricCanvas.freeDrawingBrush.width = parseInt(2, 10) || 1;
+          fabricCanvas.freeDrawingBrush.shadow = new fabric.Shadow({
+            blur: parseInt(2, 10) || 0,
+            offsetX: 0,
+            offsetY: 0,
+            affectStroke: true,
+            color: "red",
+          });
+          fabricCanvas.renderAll()  
+        })
+
+        setCanvas(fabricCanvas) 
+      })
     }
   });
 
