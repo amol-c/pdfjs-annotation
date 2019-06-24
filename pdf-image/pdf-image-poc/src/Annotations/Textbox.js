@@ -9,17 +9,21 @@ export function texboxAnnotationReducer(state, action) {
   switch (action.type) {
     case 'drawTextbox':
       addText()
+      return
     case 'initializeAudio':
-      break
+      return
     case 'handToolSelected':
     handToolSelected()
-    break
+    return
     case 'startDrawing':
       startDrawing()
-      break
+      return
     case 'saveToServer':
       saveToServer(canvas)
-      break
+      return
+    case 'addImage':
+      addImage()
+      return
     default:
       throw new Error();
   }
@@ -43,10 +47,9 @@ function addText() {
   canvas.add(text)
 }
 
-function handToolSelected() {
-  canvas.isDrawingMode = false
-}
-
-function startDrawing() {
-  canvas.isDrawingMode = true
+function addImage() {
+  fabric.Image.fromURL('https://images.unsplash.com/photo-1516222338250-863216ce01ea?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80', (image) => {
+    image.scale(0.3)
+    canvas.add(image)
+  })
 }

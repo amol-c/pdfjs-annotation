@@ -14,7 +14,7 @@ export const Toolbar = (props) => {
     <div style={style}>
       <button onClick={() => {annotationDispatch({type: "drawTextbox"})}}>Textbox</button>
       <div style={{flex: 1}}></div>
-      <button>Image</button>
+      <button onClick={()=>{annotationDispatch({type: "addImage"})}}>Image</button>
       <div style={{flex: 1}}></div>
       <button>Audio</button>
       <div style={{flex: 1}}></div>
