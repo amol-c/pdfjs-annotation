@@ -53,3 +53,11 @@ function addImage() {
     canvas.add(image)
   })
 }
+
+function handToolSelected() {
+  canvas.isDrawingMode = false
+}
+
+function startDrawing() {
+  canvas.isDrawingMode = true
+}
