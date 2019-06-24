@@ -12,19 +12,11 @@ export function texboxAnnotationReducer(state, action) {
       throw new Error();
   }
 }
-
 let canvas
 
 export const TextBoxAnnotation = (props) => {
-  useEffect(() => {
-    if(!canvas) {
-      canvas = new fabric.Canvas('the-canvas', {
-        isDrawingMode: true
-      });
-      canvas.renderAll();
-    }
-  });
-
+  canvas = props.fabricCanvas
+  alert("TEST")
   return (
     <div />
   );
