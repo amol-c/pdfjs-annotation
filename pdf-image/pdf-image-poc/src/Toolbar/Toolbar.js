@@ -17,6 +17,11 @@ export const Toolbar = (props) => {
       <button>Image</button>
       <div style={{flex: 1}}></div>
       <button>Audio</button>
+      <div style={{flex: 1}}></div>
+      <button onClick={() => {annotationDispatch({type: "handToolSelected"})}}>Hand Tool</button>
+
+      <div style={{flex: 1}}></div>
+      <button onClick={() => {annotationDispatch({type: "startDrawing"})}}>Start Drawing</button>
     </div>
   );
 }

@@ -8,10 +8,17 @@ export function texboxAnnotationReducer(state, action) {
       addText()
     case 'initializeAudio':
       break
+    case 'handToolSelected':
+    handToolSelected()
+    break
+    case 'startDrawing':
+      startDrawing()
+      break
     default:
       throw new Error();
   }
 }
+
 let canvas
 
 export const TextBoxAnnotation = (props) => {
@@ -32,3 +39,10 @@ function addText() {
   canvas.add(text)
 }
 
+function handToolSelected() {
+  canvas.isDrawingMode = false
+}
+
+function startDrawing() {
+  canvas.isDrawingMode = true
+}
