@@ -13,6 +13,7 @@ $( document ).ready(function() {
       canvas = new fabric.Canvas('the-canvas', {
         isDrawingMode: true
       });
+      canvas.backgroundColor = "white"
       canvas.freeDrawingBrush.color = "red";
       canvas.freeDrawingBrush.width = parseInt(2, 10) || 1;
       canvas.freeDrawingBrush.shadow = new fabric.Shadow({
@@ -21,7 +22,8 @@ $( document ).ready(function() {
         offsetY: 0,
         affectStroke: true,
         color: "red",
-      });    
+      });
+      canvas.renderAll()  
     } 
 });
 

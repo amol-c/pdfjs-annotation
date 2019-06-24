@@ -16,7 +16,6 @@ let canvas
 
 export const TextBoxAnnotation = (props) => {
   canvas = props.fabricCanvas
-  alert("TEST")
   return (
     <div />
   );
