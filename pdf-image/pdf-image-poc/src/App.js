@@ -19,8 +19,12 @@ function App() {
         let fabricCanvas = new fabric.Canvas('the-canvas', {
           isDrawingMode: true
         });
+        let objects = []
+        if(result.length > 0) {
+          objects = result[0].objects
+        }
 
-        fabricCanvas = fabricCanvas.loadFromJSON({objects: result[0].objects}, () => {
+        fabricCanvas = fabricCanvas.loadFromJSON({objects: objects}, () => {
           fabricCanvas.backgroundColor = "white"
           fabricCanvas.freeDrawingBrush.color = "red";
           fabricCanvas.freeDrawingBrush.width = parseInt(2, 10) || 1;
