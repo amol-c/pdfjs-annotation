@@ -24,6 +24,12 @@ export function texboxAnnotationReducer(state, action) {
     case 'addImage':
       addImage()
       return
+    case 'increaseCanvas':
+        increaseCanvas()
+      return
+    case 'decreaseCanvas':
+      decreaseCanvas()
+      return
     default:
       throw new Error();
   }
@@ -48,7 +54,7 @@ function addText() {
 }
 
 function addImage() {
-  fabric.Image.fromURL('https://images.unsplash.com/photo-1516222338250-863216ce01ea?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=967&q=80', (image) => {
+  fabric.Image.fromURL('https://image.slidesharecdn.com/theonepagelinuxmanual-150521050729-lva1-app6892/95/the-one-page-linux-manual-1-638.jpg?cb=1432184855', (image) => {
     image.scale(0.3)
     canvas.add(image)
   })
@@ -60,4 +66,20 @@ function handToolSelected() {
 
 function startDrawing() {
   canvas.isDrawingMode = true
+}
+
+function increaseCanvas() {
+  var zoom = canvas.getZoom();
+  zoom = zoom + 10/200;
+  if (zoom > 20) zoom = 20;
+  if (zoom < 0.01) zoom = 0.01;
+  canvas.setZoom(zoom);
+}
+
+function decreaseCanvas() {
+  var zoom = canvas.getZoom();
+  zoom = zoom - 10/200;
+  if (zoom > 20) zoom = 20;
+  if (zoom < 0.01) zoom = 0.01;
+  canvas.setZoom(zoom);
 }
