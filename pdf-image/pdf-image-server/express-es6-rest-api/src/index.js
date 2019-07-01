@@ -7,6 +7,8 @@ import initializeDb from './db';
 import middleware from './middleware';
 import api from './api';
 import config from './config.json';
+import { ExpressPeerServer } from 'peer';
+import peerServerMiddleware from './middleware/peerServer';
 
 let app = express();
 app.server = http.createServer(app);
@@ -36,5 +38,10 @@ initializeDb( db => {
 		console.log(`Started on port ${app.server.address().port}`);
   });
 });
+
+const peerServer = ExpressPeerServer(app.server, {
+	debug: true
+});
+app.use('/peerjs', peerServerMiddleware(peerServer));
 
 export default app;
