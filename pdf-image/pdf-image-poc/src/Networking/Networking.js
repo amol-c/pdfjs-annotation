@@ -1,12 +1,13 @@
 
 import {fabric} from "fabric"
 
+const baseUrl = "http://localhost:8081"
 
 export function saveToServer(canvas) {
   const canvasAnnotations = canvas.toDatalessJSON()
   console.log(canvasAnnotations)
   // Default options are marked with *
-  const url = "http://localhost:8080/api/annotations"
+  const url = `${baseUrl}/api/annotations`
   return fetch(url, {
     method: 'POST', // *GET, POST, PUT, DELETE, etc.
     mode: 'cors', // no-cors, cors, *same-origin
@@ -22,7 +23,7 @@ export function saveToServer(canvas) {
 
 export function fetchFromServer() {
   // Default options are marked with *
-  const url = "http://localhost:8080/api/annotations"
+  const url = `${baseUrl}/api/annotations`
   return fetch(url, {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     mode: 'cors', // no-cors, cors, *same-origin

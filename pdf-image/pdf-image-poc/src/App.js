@@ -2,18 +2,22 @@ import React, {useReducer, useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
-import { TextBoxAnnotation, texboxAnnotationReducer } from "./Annotations/Textbox"
+import { TextBoxAnnotation, annotationReducer } from "./Annotations/Textbox"
 import {fabric} from "fabric"
 import {fetchFromServer} from "./Networking/Networking"
+import {initializePeerConnection} from "./Networking/PeerNetworking"
+
 import $ from "jquery"
 
 function App() {
   const initialState = {}
-  const [_, dispatch] = useReducer(texboxAnnotationReducer, initialState);
+  const [_, dispatch] = useReducer(annotationReducer, initialState);
   let [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
     if(!canvas) {
+      initializePeerConnection()
+
       fetchFromServer().then(result => {
         console.log(result)
         let fabricCanvas = new fabric.Canvas('the-canvas', {
@@ -35,9 +39,8 @@ function App() {
             affectStroke: true,
             color: "red",
           });
-          fabricCanvas.renderAll()  
+          fabricCanvas.renderAll()
         })
-
         setCanvas(fabricCanvas) 
       })
     }

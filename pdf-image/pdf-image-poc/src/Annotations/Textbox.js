@@ -5,7 +5,7 @@ import {saveToServer} from "../Networking/Networking"
 
 let canvas
 
-export function texboxAnnotationReducer(state, action) {
+export function annotationReducer(state, action) {
   switch (action.type) {
     case 'drawTextbox':
       addText()
@@ -37,6 +37,7 @@ export function texboxAnnotationReducer(state, action) {
 
 export const TextBoxAnnotation = (props) => {
   canvas = props.fabricCanvas
+  ///
   return (
     <div />
   );
