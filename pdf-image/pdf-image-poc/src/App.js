@@ -5,7 +5,7 @@ import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
 import { TextBoxAnnotation, annotationReducer } from "./Annotations/Textbox"
 import {fabric} from "fabric"
 import {fetchFromServer} from "./Networking/Networking"
-import {initializePeerConnection} from "./Networking/PeerNetworking"
+import {initializePeerConnection, join} from "./Networking/PeerNetworking"
 
 import $ from "jquery"
 
@@ -16,8 +16,6 @@ function App() {
 
   useEffect(() => {
     if(!canvas) {
-      initializePeerConnection()
-
       fetchFromServer().then(result => {
         console.log(result)
         let fabricCanvas = new fabric.Canvas('the-canvas', {
@@ -42,6 +40,10 @@ function App() {
           fabricCanvas.renderAll()
         })
         setCanvas(fabricCanvas) 
+      }).then(() => {
+        return initializePeerConnection()
+      }).then(() => {
+        return join()
       })
     }
   });

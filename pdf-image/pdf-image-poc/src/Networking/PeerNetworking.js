@@ -6,38 +6,109 @@ const remotePeerId = `FXlKpoOBB5bxPTAjTWPyKoWNkx17cXF1R4kmJp9iLkFvXKqn5jQ0jVWpqI
 
 const DEPLOY = false
 
-let peer
-let conn
+let peer: Peer
+let conn: Peer.DataConnection
 
 export function initializePeerConnection() {
+  return new Promise((resolve ,reject) => {
+
+    if (DEPLOY) {
+      peer = new Peer(remotePeerId, {
+        debug: 2
+    });
+    } else {
+      peer = new Peer(myId, {
+        debug: 2
+      }); 
+    }
+
+    // Create own peer object with connection to shared PeerJS server
+    peer.on('open', (id) => {
+      console.log(`MY PEER ID IS: ${id}`)
+      resolve()
+    });
+
+    peer.on('disconnected', function () {
+      console.log(`PEER CONNECTION DISCONNECTED`)
+      peer.reconnect();
+    });
+
+    peer.on('error', function (err) {
+      console.log(err);
+    });
+
+    peer.on('connection', function(connection) {
+      connection.on('open', () => {
+        console.log(`CONN CONNECTED`)
+        connection.on('data', (data) => {
+          console.log("DATA Received")
+          console.log(data)
+        })
+        connection.send('hi!');
+    
+        resolve()
+      });    
+    })
+  })
+}
+
+export function join() {
+  return new Promise((resolve, reject) => {
+
   if (DEPLOY) {
-     peer = new Peer(remotePeerId); 
-
-     conn = peer.connect(myId);  
+    conn = peer.connect(myId, {
+      reliable: true,
+      serialization: "json"
+    });
   } else {
-     peer = new Peer(myId); 
-
-     conn = peer.connect(remotePeerId);  
+    conn = peer.connect(remotePeerId, {
+      reliable: true,
+      serialization: "json"
+    });
   }
 
   if(!conn) {
-    console.error(`CLIENT NOT FOUND`)
+    console.error(`Connection is invalid`)
+    reject(`Connection is invalid`)
     return
   }
 
-  conn.on('open', () => {
-    console.log(`CONNECTED`)
-    conn.send('hi!');
-  });
+  // conn.on('open', () => {
+  //   console.log(`CONN CONNECTED`)
+  //   conn.on('data', (data) => {
+  //     console.log("DATA Received")
+  //     console.log(data)
+  //   })
+  //   conn.send('hi!');
+
+  //   resolve()
+  // });
 
   conn.on('error', (error) => {
-    console.error(error)
+    console.log(`ERROR`)
+    console.log(error)
   })
 
-  peer.on('connection', (conn) => {
-    conn.on('data', (data) => {
-      // Will print 'hi!'
-      console.log(data);
+    conn.on('close', function () {
+      console.log("Connection Closed")
     });
-  });  
+
+    setInterval(function() {
+      if (conn.open) {
+        conn.send({TESTIN: "AMOL SENT"})
+        console.log("Data sending")  
+      } else {
+        conn.close()
+        join()
+        console.log("Connection is closed")
+      }
+    }, 3000)
+  })
+}
+
+export function close() {
+  if (conn) {
+    conn.close();
+    console.log("Connection closed")
+  }
 }
