@@ -74,17 +74,6 @@ export function join() {
     return
   }
 
-  // conn.on('open', () => {
-  //   console.log(`CONN CONNECTED`)
-  //   conn.on('data', (data) => {
-  //     console.log("DATA Received")
-  //     console.log(data)
-  //   })
-  //   conn.send('hi!');
-
-  //   resolve()
-  // });
-
   conn.on('error', (error) => {
     console.log(`ERROR`)
     console.log(error)
@@ -93,18 +82,13 @@ export function join() {
     conn.on('close', function () {
       console.log("Connection Closed")
     });
-
-    setInterval(function() {
-      if (conn.open) {
-        conn.send({TESTIN: "AMOL SENT"})
-        console.log("Data sending")  
-      } else {
-        conn.close()
-        join()
-        console.log("Connection is closed")
-      }
-    }, 3000)
   })
+}
+
+export function send(data) {
+  if (conn.open) {
+    conn.send(data)
+  }
 }
 
 export function close() {
