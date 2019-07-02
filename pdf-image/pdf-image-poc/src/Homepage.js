@@ -1,8 +1,10 @@
 import React from 'react';
+import { getAllStudentIds } from './Networking/PeerNetworking';
 
 export default function Homepage() {
+    const ids = getAllStudentIds();
     return (
-        <table>
+        <table className="studentTable">
             <thead>
                 <tr>
                     <td>Student</td>
@@ -10,10 +12,18 @@ export default function Homepage() {
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Michael</td>
-                    <td>Yes</td>
-                </tr>
+                {ids.map(id => {
+                    return (
+                        <tr onClick={() => {
+                            const params = new URLSearchParams(window.location.search);
+                            params.set('viewingStudentId', id);
+                            window.location.replace(`/?${params.toString()}`)
+                        }}>
+                            <td>{id}</td>
+                            <td />
+                        </tr>
+                    )
+                })}
             </tbody>
         </table>
     )
