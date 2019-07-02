@@ -1,6 +1,6 @@
 import Peer from 'peerjs';
 
-const myId = `iSyF5aoxn4H5U0UvDEPpE00Tr1ovkxhh6d65XUv66lcSb1bAsWqcpdSfQrv18tlHGaaeQdC01HQzSKCMft5geDTjRnlKPYgxtR8VebWHsGxJMUVhdQsfGqBNkB5uyChz8h0eywpY83uKX8xN9wAMhCTPePHKjMuS`
+const myId = `iSyF5aoxn4123H5U0UvDEPpE00Tr1ovkxhh6d65XUv66lcSb1bAsWqcpdSfQrv18tlHGaaeQdC01HQzSKCMft5geDTjRnlKPYgxtR8VebWHsGxJMUVhdQsfGqBNkB5uyChz8h0eywpY83uKX8xN9wAMhCTPePHKjMuS`
 
 const remotePeerId = `FXlKpoOBB5bxPTAjTWPyKoWNkx17cXF1R4kmJp9iLkFvXKqn5jQ0jVWpqIOTZ32Z3QxwUsilHntbHBBwb2YpxFfeCZUjMTu2FSQ6imgXi1eh6BLyRbA9qEw73tnwt95WfyeaLX6Wl4pM68ey6TI4rLjnSJWeBNpt`
 
@@ -9,9 +9,8 @@ const DEPLOY = false
 let peer: Peer
 let conn: Peer.DataConnection
 
-export function initializePeerConnection() {
+export function initializePeerConnection(callback) {
   return new Promise((resolve ,reject) => {
-
     if (DEPLOY) {
       peer = new Peer(remotePeerId, {
         debug: 2
@@ -30,7 +29,7 @@ export function initializePeerConnection() {
 
     peer.on('disconnected', function () {
       console.log(`PEER CONNECTION DISCONNECTED`)
-      peer.reconnect();
+      // peer.reconnect();
     });
 
     peer.on('error', function (err) {
@@ -43,11 +42,11 @@ export function initializePeerConnection() {
         connection.on('data', (data) => {
           console.log("DATA Received")
           console.log(data)
+          callback(data)
         })
         connection.send('hi!');
-    
-        resolve()
-      });    
+      });
+      resolve() 
     })
   })
 }
@@ -61,10 +60,11 @@ export function join() {
       serialization: "json"
     });
   } else {
-    conn = peer.connect(remotePeerId, {
-      reliable: true,
-      serialization: "json"
-    });
+    // conn = peer.connect(remotePeerId, {
+    //   reliable: true,
+    //   serialization: "json"
+    // });
+    return
   }
 
   if(!conn) {
@@ -84,9 +84,12 @@ export function join() {
   })
 }
 
-export function send(data) {
-  if (conn.open) {
+export function sendToPeer(data) {
+  if (conn && conn.open) {
     conn.send(data)
+    console.log("Data sent to Peer")
+  } else {
+    console.log("Failed to send data to Peer")
   }
 }
 

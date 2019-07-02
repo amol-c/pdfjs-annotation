@@ -1,7 +1,7 @@
 
 import {fabric} from "fabric"
 
-const baseUrl = "http://localhost:8081"
+const baseUrl = "http://10.0.3.29:8081"
 
 export function saveToServer(canvas) {
   const canvasAnnotations = canvas.toDatalessJSON()
