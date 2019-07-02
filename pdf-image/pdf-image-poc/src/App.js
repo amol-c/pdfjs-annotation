@@ -5,12 +5,13 @@ import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
 import { annotationReducer } from "./reducers/AnnotationReducer"
 import {fabric} from "fabric"
 import {fetchFromServer} from "./Networking/Networking"
-import {initializePeerConnection, join} from "./Networking/PeerNetworking"
+import {initializePeerConnection, join, getUserIds} from "./Networking/PeerNetworking"
 
 import $ from "jquery"
 import { peerReducer } from './reducers/PeerReducer';
+import Homepage from './Homepage';
 
-function App() {
+function Canvas() {
   const initialState = {}
   const [_, dispatch] = useReducer(annotationReducer, initialState);
   const [peerState, peerDispatch] = useReducer(peerReducer, initialState);
@@ -94,4 +95,12 @@ function removeFabricEventListener(fabricCanvas) {
   fabricCanvas.off('object:added');
 }
 
-export default App;
+export default () => {
+  const isTeacher = getUserIds()[2];
+  const viewingStudentId = getUserIds()[3];
+
+  if (!isTeacher || viewingStudentId) {
+    return <Canvas />;
+  }
+  return <Homepage />
+}

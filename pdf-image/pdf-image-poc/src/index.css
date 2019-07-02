@@ -15,3 +15,16 @@ body {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 } */
+
+table, th, td {
+  border-collapse: collapse;
+  border: solid 1px #000;
+}
+
+td {
+  padding: 5px;
+}
+
+tbody tr {
+  cursor: pointer;
+}

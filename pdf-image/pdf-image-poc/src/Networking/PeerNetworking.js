@@ -142,7 +142,8 @@ export function getUserIds() {
 
   const isTeacher = urlParams.get('isTeacher') === "true"
 
-  return [teacherId, studentId, isTeacher]
+  const viewingStudentId = urlParams.get('viewingStudentId');
+  return [teacherId, studentId, isTeacher, viewingStudentId];
 }
 
 function setupTeacherConnections(callback) {
