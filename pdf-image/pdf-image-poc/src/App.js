@@ -10,6 +10,7 @@ import {initializePeerConnection, join, getUserIds, peerDataSubject} from "./Net
 import $ from "jquery"
 import { peerReducer } from './reducers/PeerReducer';
 import Homepage from './Homepage';
+import Confetti from 'react-dom-confetti';
 
 function Canvas({viewingStudentId}) {
   const initialState = {}
@@ -18,12 +19,16 @@ function Canvas({viewingStudentId}) {
 
   let [canvas, setCanvas] = useState(null);
 
+  let [confettiFlag, setConfetti] = useState(false)
+
+  const canvasId = "the-canvas"
+
   useEffect(() => {
     const runEffect = async () => {
       if(!canvas) {
             const fabricCanvas = await fetchFromServer().then(result => {
                 console.log(result)
-                let fabricCanvas = new fabric.Canvas('the-canvas', {
+                let fabricCanvas = new fabric.Canvas(canvasId, {
                   isDrawingMode: true
                 });
                 let objects = []
@@ -38,26 +43,51 @@ function Canvas({viewingStudentId}) {
               })
   
           peerDataSubject.subscribe(({type, data}) => {
-              if (type === 'annotations') {
-                const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
+              switch (type) {
+                case "annotations":
+                    const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
           
-                removeFabricEventListener(fabricCanvas)
-                updateCanvas(fabricCanvas, data.objects)
-                setupFabricEventListener(fabricCanvas, peerDispatchFunc)  
-              } else if (type === 'helpRequest') {
-                window.alert(`${data} needs help.`);
+                    removeFabricEventListener(fabricCanvas)
+                    updateCanvas(fabricCanvas, data.objects)
+                    setupFabricEventListener(fabricCanvas, peerDispatchFunc)      
+                return
+                case "helpRequest":
+                    window.alert(`${data} needs help.`);
+                return
+                case "command":
+                  if(data === "KUDOS") {
+                    setConfetti(true)
+                    setTimeout(() => {
+                      setConfetti(false)
+                    }, 1000)
+                  }
+                return
               }
           })
     }}
     runEffect();
   });
 
+  const confettiConfig = {
+    angle: 90,
+    spread: "1000",
+    startVelocity: 100,
+    elementCount: 100,
+    dragFriction: 0.1,
+    duration: 5000,
+    stagger: 0,
+    width: "10px",
+    height: "10px",
+    colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"]
+  };
+  
   return (
     <div className="App">
       <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} viewingStudentId={viewingStudentId} />
       <header className="App-header">
-        <canvas className="A4 page" id="the-canvas" width="480" height="600"></canvas>
+        <canvas className="A4 page" id={canvasId} width="480" height="600"></canvas>
       </header>
+      <Confetti config={confettiConfig} active={confettiFlag}/>
     </div>
   );
 }

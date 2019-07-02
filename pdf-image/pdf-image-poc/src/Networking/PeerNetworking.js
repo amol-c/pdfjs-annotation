@@ -86,6 +86,7 @@ export function join() {
 
     conn.on('data', (data) => {
       console.log(`Received data from TEACHER`, data)
+      peerDataSubject.next(data)
     })
   });
   if (!isTeacher) {
@@ -113,7 +114,7 @@ export function sendKudosToStudent(peerId) {
 
   const connection = connections[peerId]
   if(connection && connection.open) {
-    connection.send({command: "KUDOS"})
+    connection.send({type: "command", data: "KUDOS"})
     console.log("Sent KUDOS")
     return
   }
@@ -137,7 +138,7 @@ let cachedStudentId;
 export function getUserIds() {
   var urlParams = new URLSearchParams(window.location.search);
   const teacherId = urlParams.get('teacherId')
-  const studentId = cachedStudentId || uuidv4();
+  const studentId = cachedStudentId || uuidv4()
   cachedStudentId = studentId;
 
   const isTeacher = urlParams.get('isTeacher') === "true"

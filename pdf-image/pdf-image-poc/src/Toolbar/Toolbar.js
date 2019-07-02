@@ -16,6 +16,17 @@ export const Toolbar = (props) => {
   const urlParams = new URLSearchParams(window.location.search);
   const viewingStudentId = props.viewingStudentId
 
+  // Display tools.
+  if(viewingStudentId) {
+    return (
+      <div style={style}>
+        <div style={{flex: 1}}></div>
+        <button onClick={() => {peerDispatch({type: "sendKudos", viewingStudentId: viewingStudentId})}}>Kudos</button>
+      </div>
+    );
+  }
+
+
   return (
     <div style={style}>
       <button onClick={() => {annotationDispatch({type: "drawTextbox", canvas: canvas})}}>Textbox</button>
@@ -32,10 +43,6 @@ export const Toolbar = (props) => {
       <button onClick={() => {annotationDispatch({type: "increaseCanvas", canvas: canvas})}}>+</button>
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "decreaseCanvas", canvas: canvas})}}>-</button>
-      
-      <div style={{flex: 1}}></div>
-      <button onClick={() => {peerDispatch({type: "sendKudos", viewingStudentId: viewingStudentId})}}>Kudos</button>
-
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "saveToServer", canvas: canvas})}}>Save</button>
       <div style={{flex: 1}}></div>
