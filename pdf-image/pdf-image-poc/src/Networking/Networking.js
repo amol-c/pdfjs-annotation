@@ -1,7 +1,7 @@
 
 import {fabric} from "fabric"
 
-const baseUrl = "http://10.0.3.29:8081"
+const baseUrl = "http://localhost:8081"
 
 export function saveToServer(canvas) {
   const canvasAnnotations = canvas.toDatalessJSON()
@@ -36,3 +36,21 @@ export function fetchFromServer() {
 .then(response => response.json()); // parses JSON response into native Javascript objects 
 }
 
+export function registerTeacherId(teacherId) {
+  return fetch(`${baseUrl}/api/register_teacher_id/${teacherId}`, {
+    method: 'POST',
+  });
+}
+
+export function waitForTeacherConnected(teacherId) {
+  return new Promise(resolve => {
+    const interval = setInterval(() => {
+      fetch(`${baseUrl}/api/teacher_connected/${teacherId}`).then(response => response.json()).then(res => {
+        if (res) {
+          resolve();
+          clearInterval(interval);
+        }
+      })
+    }, 3000)
+  })
+}
