@@ -10,6 +10,7 @@ const style = {
 
 export const Toolbar = (props) => {
   const annotationDispatch = props.annotationDispatch
+  const peerDispatch = props.peerDispatch
   const canvas = props.fabricCanvas
   return (
     <div style={style}>
@@ -27,6 +28,9 @@ export const Toolbar = (props) => {
       <button onClick={() => {annotationDispatch({type: "increaseCanvas", canvas: canvas})}}>+</button>
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "decreaseCanvas", canvas: canvas})}}>-</button>
+      
+      <div style={{flex: 1}}></div>
+      <button onClick={() => {peerDispatch({type: "sendKudos"})}}>Kudos</button>
 
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "saveToServer", canvas: canvas})}}>Save</button>

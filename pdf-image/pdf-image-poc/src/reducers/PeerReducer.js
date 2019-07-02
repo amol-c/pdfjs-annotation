@@ -1,4 +1,4 @@
-import {sendToPeer} from "../Networking/PeerNetworking"
+import {sendToPeer, sendKudosToStudent} from "../Networking/PeerNetworking"
 
 export function peerReducer(state, action) {
   const canvas = action.canvas
@@ -11,7 +11,9 @@ export function peerReducer(state, action) {
       const canvasAnnotations = canvas.toDatalessJSON()
       sendToPeer(canvasAnnotations)
       return
+    case 'sendKudos':
+        sendKudosToStudent(canvasAnnotations)
     default:
-      throw new Error();    
+      throw new Error();
   }
 }
