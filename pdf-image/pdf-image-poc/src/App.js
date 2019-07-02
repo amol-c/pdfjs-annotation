@@ -27,10 +27,14 @@ function Canvas({viewingStudentId}) {
     const runEffect = async () => {
       if(!canvas) {
             const fabricCanvas = await fetchFromServer().then(result => {
-                console.log(result)
+                let isDrawingMode = true
+                if(viewingStudentId) {
+                  isDrawingMode = false
+                }
                 let fabricCanvas = new fabric.Canvas(canvasId, {
-                  isDrawingMode: true
+                  isDrawingMode: isDrawingMode
                 });
+
                 let objects = []
                 if(result.length > 0) {
                   objects = result[0].objects
@@ -57,7 +61,7 @@ function Canvas({viewingStudentId}) {
                     setupFabricEventListener(fabricCanvas, peerDispatchFunc)      
                 return
                 case "helpRequest":
-                    window.alert(`${data} needs help.`);
+                    window.alert(`${incomingPeerId} needs help.`);
                 return
                 case "command":
                   if(data === "KUDOS") {

@@ -1,4 +1,4 @@
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useState } from 'react';
 import { sendToPeer, getUserIds } from '../Networking/PeerNetworking';
 export const TodosDispatch = React.createContext(null);
 
@@ -15,6 +15,9 @@ export const Toolbar = (props) => {
   const canvas = props.fabricCanvas
   const urlParams = new URLSearchParams(window.location.search);
   const viewingStudentId = props.viewingStudentId
+  const [requestHelp, setRequestHelp] = useState(false)
+
+
 
   // Display tools.
   if(viewingStudentId) {
@@ -46,7 +49,12 @@ export const Toolbar = (props) => {
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "saveToServer", canvas: canvas})}}>Save</button>
       <div style={{flex: 1}}></div>
-      <button onClick={() => {sendToPeer({type: "helpRequest", data: getUserIds()[1]})}}>Ask for Help</button>
+      <button onClick={() => {
+        console.log(requestHelp)
+        const shouldRequestHelp = !requestHelp
+        setRequestHelp(shouldRequestHelp)
+        sendToPeer({type: "helpRequest", data: shouldRequestHelp})}
+        }>{requestHelp ? "Waiting for teacher" : "Ask for Help" }</button>
     </div>
   );
 }
