@@ -38,12 +38,16 @@ function App() {
           setCanvas(fabricCanvas) 
           return fabricCanvas
         }).then((canvas) => {
-          return initializePeerConnection((data) => {
-            const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
+          return initializePeerConnection(({type, data}) => {
+            if (type === 'annotations') {
+              const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
 
-            removeFabricEventListener(canvas)
-            updateCanvas(canvas, data.objects)
-            setupFabricEventListener(canvas, peerDispatchFunc)
+              removeFabricEventListener(canvas)
+              updateCanvas(canvas, data.objects)
+              setupFabricEventListener(canvas, peerDispatchFunc)  
+            } else if (type === 'helpRequest') {
+              window.alert(`${data} needs help.`);
+            }
           })
         }).then(() => {
           return join()

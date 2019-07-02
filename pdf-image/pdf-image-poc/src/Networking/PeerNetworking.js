@@ -133,6 +133,18 @@ export function close() {
   }
 }
 
+let cachedStudentId;
+export function getUserIds() {
+  var urlParams = new URLSearchParams(window.location.search);
+  const teacherId = urlParams.get('teacherId')
+  const studentId = cachedStudentId || uuidv4();
+  cachedStudentId = studentId;
+
+  const isTeacher = urlParams.get('isTeacher') === "true"
+
+  return [teacherId, studentId, isTeacher]
+}
+
 function setupTeacherConnections(callback) {
   peer.on('connection', function(connection) {
     connection.on('open', () => {
@@ -155,14 +167,4 @@ function setupTeacherConnections(callback) {
       console.log(`deleted`, connection, `open connections: `, connection)
     })
   })
-}
-
-function getUserIds() {
-  var urlParams = new URLSearchParams(window.location.search);
-  const teacherId = urlParams.get('teacherId')
-  const studentId = uuidv4();
-
-  const isTeacher = urlParams.get('isTeacher') === "true"
-
-  return [teacherId, studentId, isTeacher]
 }
