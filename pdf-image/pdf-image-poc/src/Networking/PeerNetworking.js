@@ -1,5 +1,6 @@
 import Peer from 'peerjs';
 import uuidv4 from 'uuid/v4';
+import { registerTeacherId, waitForTeacherConnected } from './Networking';
 
 const DEPLOY = true;
 
@@ -14,9 +15,8 @@ const options = {
 }
 
 export function initializePeerConnection(callback) {
-  return new Promise((resolve ,reject) => {
-    const [teacherId, studentId, isTeacher] = getUserIds()
-    console.log(isTeacher)
+  const [teacherId, studentId, isTeacher] = getUserIds()
+  const connectToPeer = () => new Promise((resolve ,reject) => {
     if (isTeacher) {
       peer = new Peer(teacherId, options);
     } else {
@@ -50,33 +50,32 @@ export function initializePeerConnection(callback) {
       });
       resolve() 
     })
-  })
+  });
+  if (isTeacher) {
+    return registerTeacherId(teacherId).then(connectToPeer);
+  } else {
+    return connectToPeer();
+  }
 }
 
 export function join() {
-  return new Promise((resolve, reject) => {
-    const [teacherId, studentId, isTeacher] = getUserIds()
-
-  if (isTeacher) {
-    resolve();
-    return;
-  } else {
+  const [teacherId, studentId, isTeacher] = getUserIds()
+  const connectToPeer = () => new Promise((resolve, reject) => {
     conn = peer.connect(teacherId, {
       reliable: true,
       serialization: "json"
     });
-  }
 
-  if(!conn) {
-    console.error(`Connection is invalid`)
-    reject(`Connection is invalid`)
-    return
-  }
+    if(!conn) {
+      console.error(`Connection is invalid`)
+      reject(`Connection is invalid`)
+      return
+    }
 
-  conn.on('error', (error) => {
-    console.log(`ERROR`)
-    console.log(error)
-  })
+    conn.on('error', (error) => {
+      console.log(`ERROR`)
+      console.log(error)
+    })
 
     conn.on('close', function () {
       setTimeout(function() {
@@ -84,7 +83,12 @@ export function join() {
       }, 100)
       console.log("Connection Closed")
     });
-  })
+  });
+  if (!isTeacher) {
+    return waitForTeacherConnected(teacherId).then(connectToPeer);
+  } else {
+    return Promise.resolve();
+  }
 }
 
 export function sendToPeer(data) {
