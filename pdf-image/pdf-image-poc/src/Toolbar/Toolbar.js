@@ -13,6 +13,9 @@ export const Toolbar = (props) => {
   const annotationDispatch = props.annotationDispatch
   const peerDispatch = props.peerDispatch
   const canvas = props.fabricCanvas
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewingStudentId = urlParams.get('viewingStudentId')
+
   return (
     <div style={style}>
       <button onClick={() => {annotationDispatch({type: "drawTextbox", canvas: canvas})}}>Textbox</button>
@@ -31,7 +34,7 @@ export const Toolbar = (props) => {
       <button onClick={() => {annotationDispatch({type: "decreaseCanvas", canvas: canvas})}}>-</button>
       
       <div style={{flex: 1}}></div>
-      <button onClick={() => {peerDispatch({type: "sendKudos"})}}>Kudos</button>
+      <button onClick={() => {peerDispatch({type: "sendKudos", viewingStudentId: viewingStudentId})}}>Kudos</button>
 
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "saveToServer", canvas: canvas})}}>Save</button>
