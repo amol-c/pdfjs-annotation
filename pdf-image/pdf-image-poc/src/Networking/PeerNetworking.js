@@ -1,13 +1,7 @@
 import Peer from 'peerjs';
 import uuidv4 from 'uuid/v4';
 
-// <<<<<<< HEAD
-// const myId = `iSyF5aoxn4123H5U0UvDEPpE00Tr1ovkxhh6d65XUv66lcSb1bAsWqcpdSfQrv18tlHGaaeQdC01HQzSKCMft5geDTjRnlKPYgxtR8VebWHsGxJMUVhdQsfGqBNkB5uyChz8h0eywpY83uKX8xN9wAMhCTPePHKjMuS`
-// =======
-const myId = uuidv4();
-const teacherId = 'teacher';
-
-const DEPLOY = false;
+const DEPLOY = true;
 
 let peer: Peer
 let conn: Peer.DataConnection
@@ -21,10 +15,12 @@ const options = {
 
 export function initializePeerConnection(callback) {
   return new Promise((resolve ,reject) => {
-    if (DEPLOY) {
+    const [teacherId, studentId, isTeacher] = getUserIds()
+    console.log(isTeacher)
+    if (isTeacher) {
       peer = new Peer(teacherId, options);
     } else {
-      peer = new Peer(myId, options); 
+      peer = new Peer(studentId, options); 
     }
 
     // Create own peer object with connection to shared PeerJS server
@@ -59,8 +55,9 @@ export function initializePeerConnection(callback) {
 
 export function join() {
   return new Promise((resolve, reject) => {
+    const [teacherId, studentId, isTeacher] = getUserIds()
 
-  if (DEPLOY) {
+  if (isTeacher) {
     resolve();
     return;
   } else {
@@ -82,6 +79,9 @@ export function join() {
   })
 
     conn.on('close', function () {
+      setTimeout(function() {
+        join()
+      }, 100)
       console.log("Connection Closed")
     });
   })
@@ -101,4 +101,14 @@ export function close() {
     conn.close();
     console.log("Connection closed")
   }
+}
+
+function getUserIds() {
+  var urlParams = new URLSearchParams(window.location.search);
+  const teacherId = urlParams.get('teacherId')
+  const studentId = uuidv4();
+
+  const isTeacher = urlParams.get('isTeacher') === "true"
+
+  return [teacherId, studentId, isTeacher]
 }
