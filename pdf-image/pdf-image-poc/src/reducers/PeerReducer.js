@@ -9,7 +9,7 @@ export function peerReducer(state, action) {
   switch (action.type) {
     case 'sendToPeer':
       const canvasAnnotations = canvas.toDatalessJSON()
-      sendToPeer(canvasAnnotations)
+      sendToPeer({type: 'annotations', data: canvasAnnotations})
       return
     default:
       throw new Error();    

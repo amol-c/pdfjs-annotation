@@ -1,4 +1,5 @@
 import React, { Component, useContext } from 'react';
+import { sendToPeer, getUserIds } from '../Networking/PeerNetworking';
 export const TodosDispatch = React.createContext(null);
 
 const style = {
@@ -30,6 +31,8 @@ export const Toolbar = (props) => {
 
       <div style={{flex: 1}}></div>
       <button onClick={() => {annotationDispatch({type: "saveToServer", canvas: canvas})}}>Save</button>
+      <div style={{flex: 1}}></div>
+      <button onClick={() => {sendToPeer({type: "helpRequest", data: getUserIds()[1]})}}>Ask for Help</button>
     </div>
   );
 }
