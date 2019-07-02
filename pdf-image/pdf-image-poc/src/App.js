@@ -42,9 +42,14 @@ function Canvas({viewingStudentId}) {
                 return fabricCanvas
               })
   
-          peerDataSubject.subscribe(({type, data}) => {
+          peerDataSubject.subscribe(([{type, data}, incomingPeerId]) => {
+            console.log(incomingPeerId)
               switch (type) {
                 case "annotations":
+                    if(viewingStudentId && (incomingPeerId !== viewingStudentId)) {
+                      return
+                    }
+
                     const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
           
                     removeFabricEventListener(fabricCanvas)

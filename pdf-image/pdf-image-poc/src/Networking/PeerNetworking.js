@@ -86,7 +86,7 @@ export function join() {
 
     conn.on('data', (data) => {
       console.log(`Received data from TEACHER`, data)
-      peerDataSubject.next(data)
+      peerDataSubject.next([data, conn.peer])
     })
   });
   if (!isTeacher) {
@@ -153,7 +153,8 @@ function setupTeacherConnections() {
       connection.on('data', (data) => {
         console.log("DATA Received")
         console.log(data)
-        peerDataSubject.next(data)
+        console.log(connection.peer)
+        peerDataSubject.next([data, connection.peer])
       })
 
       console.log(`CONN CONNECTED`)
