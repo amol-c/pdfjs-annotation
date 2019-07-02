@@ -5,13 +5,13 @@ import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
 import { annotationReducer } from "./reducers/AnnotationReducer"
 import {fabric} from "fabric"
 import {fetchFromServer} from "./Networking/Networking"
-import {initializePeerConnection, join, getUserIds} from "./Networking/PeerNetworking"
+import {initializePeerConnection, join, getUserIds, peerDataSubject} from "./Networking/PeerNetworking"
 
 import $ from "jquery"
 import { peerReducer } from './reducers/PeerReducer';
 import Homepage from './Homepage';
 
-function Canvas() {
+function Canvas({viewingStudentId}) {
   const initialState = {}
   const [_, dispatch] = useReducer(annotationReducer, initialState);
   const [peerState, peerDispatch] = useReducer(peerReducer, initialState);
@@ -19,46 +19,42 @@ function Canvas() {
   let [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
-    if(!canvas) {
-      const sendToPeerFunc = (fabricCanvas, peerDispatch) => {
-        return () => peerDispatch({type: "sendToPeer", canvas: fabricCanvas})
-      }
-
-      fetchFromServer().then(result => {
-          console.log(result)
-          let fabricCanvas = new fabric.Canvas('the-canvas', {
-            isDrawingMode: true
-          });
-          let objects = []
-          if(result.length > 0) {
-            objects = result[0].objects
-          }
-          fabricCanvas = updateCanvas(fabricCanvas, objects)
-          const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
-          setupFabricEventListener(fabricCanvas, peerDispatchFunc)
-          setCanvas(fabricCanvas) 
-          return fabricCanvas
-        }).then((canvas) => {
-          return initializePeerConnection(({type, data}) => {
-            if (type === 'annotations') {
-              const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
-
-              removeFabricEventListener(canvas)
-              updateCanvas(canvas, data.objects)
-              setupFabricEventListener(canvas, peerDispatchFunc)  
-            } else if (type === 'helpRequest') {
-              window.alert(`${data} needs help.`);
-            }
+    const runEffect = async () => {
+      if(!canvas) {
+            const fabricCanvas = await fetchFromServer().then(result => {
+                console.log(result)
+                let fabricCanvas = new fabric.Canvas('the-canvas', {
+                  isDrawingMode: true
+                });
+                let objects = []
+                if(result.length > 0) {
+                  objects = result[0].objects
+                }
+                fabricCanvas = updateCanvas(fabricCanvas, objects)
+                const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
+                setupFabricEventListener(fabricCanvas, peerDispatchFunc)
+                setCanvas(fabricCanvas) 
+                return fabricCanvas
+              })
+  
+          peerDataSubject.subscribe(({type, data}) => {
+              if (type === 'annotations') {
+                const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
+          
+                removeFabricEventListener(fabricCanvas)
+                updateCanvas(fabricCanvas, data.objects)
+                setupFabricEventListener(fabricCanvas, peerDispatchFunc)  
+              } else if (type === 'helpRequest') {
+                window.alert(`${data} needs help.`);
+              }
           })
-        }).then(() => {
-          return join()
-        })
-      }
+    }}
+    runEffect();
   });
 
   return (
     <div className="App">
-      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} />
+      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} viewingStudentId={viewingStudentId} />
       <header className="App-header">
         <canvas className="A4 page" id="the-canvas" width="480" height="600"></canvas>
       </header>
@@ -66,7 +62,7 @@ function Canvas() {
   );
 }
 
-function updateCanvas(fabricCanvas, objects) {
+export function updateCanvas(fabricCanvas, objects) {
   fabricCanvas.loadFromJSON({objects: objects}, () => {
     fabricCanvas.backgroundColor = "white"
     fabricCanvas.freeDrawingBrush.color = "red";
@@ -95,12 +91,24 @@ function removeFabricEventListener(fabricCanvas) {
   fabricCanvas.off('object:added');
 }
 
+const sendToPeerFunc = (fabricCanvas, peerDispatch) => {
+  return () => peerDispatch({type: "sendToPeer", canvas: fabricCanvas})
+}
+
 export default () => {
   const isTeacher = getUserIds()[2];
-  const viewingStudentId = getUserIds()[3];
+
+  const [viewingStudentId, setViewingStudentId] = useState(null);
+
+  useEffect(() => {
+    initializePeerConnection().then(() => {
+      return join()
+    })  
+  }, [])
 
   if (!isTeacher || viewingStudentId) {
-    return <Canvas />;
+    return <Canvas viewingStudentId={viewingStudentId} />;
   }
-  return <Homepage />
+
+  return <Homepage setViewingStudentId={setViewingStudentId} />
 }

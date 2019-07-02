@@ -1,6 +1,7 @@
 import Peer from 'peerjs';
 import uuidv4 from 'uuid/v4';
 import { registerTeacherId, waitForTeacherConnected } from './Networking';
+import { Subject } from 'rxjs';
 
 const DEPLOY = true;
 
@@ -14,9 +15,12 @@ const options = {
   path: 'peerjs'
 }
 
+export const peerDataSubject = new Subject();
+export const peerConnectionSubject = new Subject();
+
 export let connections: {string: Peer.DataConnection} = {}
 
-export function initializePeerConnection(callback) {
+export function initializePeerConnection() {
   const [teacherId, studentId, isTeacher] = getUserIds()
   const connectToPeer = () => new Promise((resolve ,reject) => {
     if (isTeacher) {
@@ -44,7 +48,7 @@ export function initializePeerConnection(callback) {
       return
     }
 
-    setupTeacherConnections(callback)
+    setupTeacherConnections()
   })
 
   if (isTeacher) {
@@ -109,7 +113,7 @@ export function sendKudosToStudent(peerId) {
 
   const connection = connections[peerId]
   if(connection && connection.open) {
-    conn.send({command: "KUDOS"})
+    connection.send({command: "KUDOS"})
     console.log("Sent KUDOS")
     return
   }
@@ -118,11 +122,7 @@ export function sendKudosToStudent(peerId) {
 }
 
 export function getAllStudentIds() {
-  return [
-    "ABC",
-    "XYZ",
-    "LMN"
-  ]
+  return Object.keys(connections)
 }
 
 
@@ -146,25 +146,27 @@ export function getUserIds() {
   return [teacherId, studentId, isTeacher, viewingStudentId];
 }
 
-function setupTeacherConnections(callback) {
+function setupTeacherConnections() {
   peer.on('connection', function(connection) {
     connection.on('open', () => {
       connection.on('data', (data) => {
         console.log("DATA Received")
         console.log(data)
-        callback(data)
+        peerDataSubject.next(data)
       })
 
       console.log(`CONN CONNECTED`)
       console.log(connection)
       const peerId = connection.peer
       connections[peerId] = connection
+      peerConnectionSubject.next(connections);
       console.log(connections)
     });
 
     connection.on('close', () => {
       const peerId = connection.peer
-      delete connections[peerId]
+      delete connections[peerId];
+      peerConnectionSubject.next(connections);
       console.log(`deleted`, connection, `open connections: `, connection)
     })
   })

@@ -1,8 +1,14 @@
-import React from 'react';
-import { getAllStudentIds } from './Networking/PeerNetworking';
+import React, { useState, useEffect } from 'react';
+import { getAllStudentIds, peerConnectionSubject } from './Networking/PeerNetworking';
+import { Link } from "react-router-dom";
 
-export default function Homepage() {
-    const ids = getAllStudentIds();
+export default function Homepage({setViewingStudentId}) {
+    const [ids, setIds] = useState(getAllStudentIds());
+    useEffect(() => {
+      peerConnectionSubject.subscribe(connections => {
+        setIds(Object.keys(connections));
+      })
+    }, [])
     return (
         <table className="studentTable">
             <thead>
@@ -15,10 +21,8 @@ export default function Homepage() {
                 {ids.map(id => {
                     return (
                         <tr onClick={() => {
-                            const params = new URLSearchParams(window.location.search);
-                            params.set('viewingStudentId', id);
-                            window.location.replace(`/?${params.toString()}`)
-                        }}>
+                          setViewingStudentId(id);
+                        }} key={id}>
                             <td>{id}</td>
                             <td />
                         </tr>

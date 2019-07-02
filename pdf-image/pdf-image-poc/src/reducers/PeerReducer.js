@@ -12,7 +12,7 @@ export function peerReducer(state, action) {
       return
     case 'sendKudos':
         const viewingStudentId = action.viewingStudentId
-        sendKudosToStudent(canvasAnnotations)
+        sendKudosToStudent(viewingStudentId)
         return
     default:
       throw new Error();

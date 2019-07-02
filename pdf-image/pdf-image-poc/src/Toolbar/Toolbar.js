@@ -14,7 +14,7 @@ export const Toolbar = (props) => {
   const peerDispatch = props.peerDispatch
   const canvas = props.fabricCanvas
   const urlParams = new URLSearchParams(window.location.search);
-  const viewingStudentId = urlParams.get('viewingStudentId')
+  const viewingStudentId = props.viewingStudentId
 
   return (
     <div style={style}>
