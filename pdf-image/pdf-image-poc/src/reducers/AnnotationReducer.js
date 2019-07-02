@@ -1,6 +1,5 @@
 import { addText, handToolSelected, startDrawing, addImage, increaseCanvas, decreaseCanvas} from "../Annotations/Annotations";
 import {saveToServer} from "../Networking/Networking"
-import {sendToPeer} from "../Networking/PeerNetworking"
 
 export function annotationReducer(state, action) {
   const canvas = action.canvas
@@ -30,12 +29,6 @@ export function annotationReducer(state, action) {
       return
     case 'decreaseCanvas':
       decreaseCanvas(canvas)
-      return
-    case 'sendToPeer':
-      const canvasAnnotations = canvas.toDatalessJSON()
-
-      sendToPeer(canvasAnnotations)
-      console.log("sendToPeer")
       return
     default:
       throw new Error();

@@ -8,14 +8,21 @@ import {fetchFromServer} from "./Networking/Networking"
 import {initializePeerConnection, join} from "./Networking/PeerNetworking"
 
 import $ from "jquery"
+import { peerReducer } from './reducers/PeerReducer';
 
 function App() {
   const initialState = {}
   const [_, dispatch] = useReducer(annotationReducer, initialState);
+  const [peerState, peerDispatch] = useReducer(peerReducer, initialState);
+
   let [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
     if(!canvas) {
+      const sendToPeerFunc = (fabricCanvas, peerDispatch) => {
+        return () => peerDispatch({type: "sendToPeer", canvas: fabricCanvas})
+      }
+
       fetchFromServer().then(result => {
           console.log(result)
           let fabricCanvas = new fabric.Canvas('the-canvas', {
@@ -25,14 +32,18 @@ function App() {
           if(result.length > 0) {
             objects = result[0].objects
           }
-          fabricCanvas = updateCanvas(fabricCanvas, objects, dispatch)
+          fabricCanvas = updateCanvas(fabricCanvas, objects)
+          const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
+          setupFabricEventListener(fabricCanvas, peerDispatchFunc)
           setCanvas(fabricCanvas) 
           return fabricCanvas
         }).then((canvas) => {
           return initializePeerConnection((data) => {
-            console.log(`Updating canvas`)
-            console.log(data)
-            updateCanvas(canvas, data.objects, dispatch)
+            const peerDispatchFunc = sendToPeerFunc(canvas, peerDispatch)
+
+            removeFabricEventListener(canvas)
+            updateCanvas(canvas, data.objects)
+            setupFabricEventListener(canvas, peerDispatchFunc)
           })
         }).then(() => {
           return join()
@@ -50,8 +61,7 @@ function App() {
   );
 }
 
-function updateCanvas(fabricCanvas, objects, dispatch) {
-  console.log(fabricCanvas)
+function updateCanvas(fabricCanvas, objects) {
   fabricCanvas.loadFromJSON({objects: objects}, () => {
     fabricCanvas.backgroundColor = "white"
     fabricCanvas.freeDrawingBrush.color = "red";
@@ -66,15 +76,18 @@ function updateCanvas(fabricCanvas, objects, dispatch) {
     fabricCanvas.renderAll()
   })
 
-  fabricCanvas.on('object:modified', function (event) {
-    dispatch({type: "sendToPeer", canvas: fabricCanvas})
-  });
-
-  fabricCanvas.on('object:added', function(event) {
-    dispatch({type: "sendToPeer", canvas: fabricCanvas})
-  })
-
   return fabricCanvas
+}
+
+function setupFabricEventListener(fabricCanvas, sendToPeerFunc) {
+  fabricCanvas.on('object:modified', sendToPeerFunc);
+
+  fabricCanvas.on('object:added', sendToPeerFunc)
+}
+
+function removeFabricEventListener(fabricCanvas) {
+  fabricCanvas.off('object:modified');
+  fabricCanvas.off('object:added');
 }
 
 export default App;

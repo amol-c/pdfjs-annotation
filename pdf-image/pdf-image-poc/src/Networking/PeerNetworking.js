@@ -24,11 +24,6 @@ export function initializePeerConnection(callback) {
     }
 
     // Create own peer object with connection to shared PeerJS server
-    peer.on('open', (id) => {
-      console.log(`MY PEER ID IS: ${id}`)
-      resolve()
-    });
-
     peer.on('disconnected', function () {
       console.log(`PEER CONNECTION DISCONNECTED`)
       // peer.reconnect();
@@ -40,16 +35,22 @@ export function initializePeerConnection(callback) {
 
     peer.on('connection', function(connection) {
       connection.on('open', () => {
-        console.log(`CONN CONNECTED`)
         connection.on('data', (data) => {
           console.log("DATA Received")
           console.log(data)
           callback(data)
         })
-        connection.send('hi!');
+        console.log(`CONN CONNECTED`)
+        console.log(connection)
+        connection.send({hi: "Sent!"});
+        resolve()
       });
-      resolve() 
     })
+
+    peer.on('open', (id) => {
+      console.log(`MY PEER ID IS: ${id}`)
+      resolve()
+    });
   })
 }
 
