@@ -1,25 +1,28 @@
 import Peer from 'peerjs';
+import uuidv4 from 'uuid/v4';
 
-const myId = `iSyF5aoxn4H5U0UvDEPpE00Tr1ovkxhh6d65XUv66lcSb1bAsWqcpdSfQrv18tlHGaaeQdC01HQzSKCMft5geDTjRnlKPYgxtR8VebWHsGxJMUVhdQsfGqBNkB5uyChz8h0eywpY83uKX8xN9wAMhCTPePHKjMuS`
+const myId = uuidv4();
+const teacherId = 'teacher';
 
-const remotePeerId = `FXlKpoOBB5bxPTAjTWPyKoWNkx17cXF1R4kmJp9iLkFvXKqn5jQ0jVWpqIOTZ32Z3QxwUsilHntbHBBwb2YpxFfeCZUjMTu2FSQ6imgXi1eh6BLyRbA9qEw73tnwt95WfyeaLX6Wl4pM68ey6TI4rLjnSJWeBNpt`
-
-const DEPLOY = false
+const DEPLOY = false;
 
 let peer: Peer
 let conn: Peer.DataConnection
+
+const options = {
+  debug: 2,
+  host: 'localhost',
+  port: 8081,
+  path: 'peerjs'
+}
 
 export function initializePeerConnection() {
   return new Promise((resolve ,reject) => {
 
     if (DEPLOY) {
-      peer = new Peer(remotePeerId, {
-        debug: 2
-    });
+      peer = new Peer(teacherId, options);
     } else {
-      peer = new Peer(myId, {
-        debug: 2
-      }); 
+      peer = new Peer(myId, options); 
     }
 
     // Create own peer object with connection to shared PeerJS server
@@ -56,12 +59,10 @@ export function join() {
   return new Promise((resolve, reject) => {
 
   if (DEPLOY) {
-    conn = peer.connect(myId, {
-      reliable: true,
-      serialization: "json"
-    });
+    resolve();
+    return;
   } else {
-    conn = peer.connect(remotePeerId, {
+    conn = peer.connect(teacherId, {
       reliable: true,
       serialization: "json"
     });
