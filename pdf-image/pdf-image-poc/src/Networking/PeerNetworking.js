@@ -14,6 +14,8 @@ const options = {
   path: 'peerjs'
 }
 
+export let connections: {string: Peer.DataConnection} = {}
+
 export function initializePeerConnection(callback) {
   const [teacherId, studentId, isTeacher] = getUserIds()
   const connectToPeer = () => new Promise((resolve ,reject) => {
@@ -33,23 +35,16 @@ export function initializePeerConnection(callback) {
       console.log(err);
     });
 
-    peer.on('connection', function(connection) {
-      connection.on('open', () => {
-        connection.on('data', (data) => {
-          console.log("DATA Received")
-          console.log(data)
-          callback(data)
-        })
-        console.log(`CONN CONNECTED`)
-        console.log(connection)
-        connection.send({hi: "Sent!"});
-        resolve()
-      });
-    })
     peer.on('open', (id) => {
       console.log(`MY PEER ID IS: ${id}`)
       resolve()
     });
+
+    if (!isTeacher) {
+      return
+    }
+
+    setupTeacherConnections(callback)
   })
 
   if (isTeacher) {
@@ -84,6 +79,10 @@ export function join() {
       }, 100)
       console.log("Connection Closed")
     });
+
+    conn.on('data', (data) => {
+      console.log(`Received data from TEACHER`, data)
+    })
   });
   if (!isTeacher) {
     return waitForTeacherConnected(teacherId).then(connectToPeer);
@@ -100,6 +99,32 @@ export function sendToPeer(data) {
     console.log("Failed to send data to Peer")
   }
 }
+
+export function sendKudosToStudent(peerId) {
+  if (!peerId) {
+    console.log(`Failed to send KUDOS. peerId is undefined`)
+
+    return
+  }
+
+  const connection = connections[peerId]
+  if(connection && connection.open) {
+    conn.send({command: "KUDOS"})
+    console.log("Sent KUDOS")
+    return
+  }
+
+  console.log(`Failed to send KUDOS`)
+}
+
+export function getAllStudentIds() {
+  return [
+    "ABC",
+    "XYZ",
+    "LMN"
+  ]
+}
+
 
 export function close() {
   if (conn) {
@@ -119,4 +144,28 @@ export function getUserIds() {
 
   const viewingStudentId = urlParams.get('viewingStudentId');
   return [teacherId, studentId, isTeacher, viewingStudentId];
+}
+
+function setupTeacherConnections(callback) {
+  peer.on('connection', function(connection) {
+    connection.on('open', () => {
+      connection.on('data', (data) => {
+        console.log("DATA Received")
+        console.log(data)
+        callback(data)
+      })
+
+      console.log(`CONN CONNECTED`)
+      console.log(connection)
+      const peerId = connection.peer
+      connections[peerId] = connection
+      console.log(connections)
+    });
+
+    connection.on('close', () => {
+      const peerId = connection.peer
+      delete connections[peerId]
+      console.log(`deleted`, connection, `open connections: `, connection)
+    })
+  })
 }

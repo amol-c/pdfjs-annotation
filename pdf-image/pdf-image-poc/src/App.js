@@ -58,7 +58,7 @@ function Canvas() {
 
   return (
     <div className="App">
-      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} />
+      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} />
       <header className="App-header">
         <canvas className="A4 page" id="the-canvas" width="480" height="600"></canvas>
       </header>
