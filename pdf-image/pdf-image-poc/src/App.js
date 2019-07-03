@@ -26,25 +26,31 @@ function Canvas({viewingStudentId, setViewingStudentId}) {
   useEffect(() => {
     const runEffect = async () => {
       if(!canvas) {
-            const fabricCanvas = await fetchFromServer().then(result => {
-                let isDrawingMode = true
-                if(viewingStudentId) {
-                  isDrawingMode = false
-                }
-                let fabricCanvas = new fabric.Canvas(canvasId, {
-                  isDrawingMode: isDrawingMode
-                });
+            const initializeCanvas = (result) => {
+              let isDrawingMode = true
+              if(viewingStudentId) {
+                isDrawingMode = false
+              }
+              let fabricCanvas = new fabric.Canvas(canvasId, {
+                isDrawingMode: isDrawingMode
+              });
 
-                let objects = []
-                if(result.length > 0) {
-                  objects = result[0].objects
-                }
-                fabricCanvas = updateCanvas(fabricCanvas, objects)
-                const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
-                setupFabricEventListener(fabricCanvas, peerDispatchFunc)
-                setCanvas(fabricCanvas) 
-                return fabricCanvas
-              })
+              let objects = []
+              if(result.length > 0) {
+                objects = result[0].objects
+              }
+              fabricCanvas = updateCanvas(fabricCanvas, objects)
+              const peerDispatchFunc = sendToPeerFunc(fabricCanvas, peerDispatch)
+              setupFabricEventListener(fabricCanvas, peerDispatchFunc)
+              setCanvas(fabricCanvas) 
+              return fabricCanvas
+            }
+
+            const fabricCanvas = await fetchFromServer().then(result => {
+              return initializeCanvas(result)
+            }).catch(error => {
+              return initializeCanvas([])
+            })
           
           peerDataSubject.subscribe(([{type, data}, incomingPeerId]) => {
               switch (type) {
