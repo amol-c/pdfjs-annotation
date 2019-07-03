@@ -5,7 +5,7 @@ import {Toolbar,TodosDispatch} from "./Toolbar/Toolbar"
 import { annotationReducer } from "./reducers/AnnotationReducer"
 import {fabric} from "fabric"
 import {fetchFromServer} from "./Networking/Networking"
-import {initializePeerConnection, join, getUserIds, peerDataSubject} from "./Networking/PeerNetworking"
+import {initializePeerConnection, join, getUserIds, peerDataSubject, sendToPeer, requestAnnotationsFromStudent} from "./Networking/PeerNetworking"
 
 import $ from "jquery"
 import { peerReducer } from './reducers/PeerReducer';
@@ -19,7 +19,7 @@ function Canvas({viewingStudentId, setViewingStudentId}) {
 
   let [canvas, setCanvas] = useState(null);
 
-  let [confettiFlag, setConfetti] = useState(false)
+  let [confettiFlag, setConfetti] = useState(false);
 
   const canvasId = "the-canvas"
 
@@ -45,9 +45,8 @@ function Canvas({viewingStudentId, setViewingStudentId}) {
                 setCanvas(fabricCanvas) 
                 return fabricCanvas
               })
-  
+          
           peerDataSubject.subscribe(([{type, data}, incomingPeerId]) => {
-            console.log(incomingPeerId)
               switch (type) {
                 case "annotations":
                     if(viewingStudentId && (incomingPeerId !== viewingStudentId)) {
@@ -70,12 +69,21 @@ function Canvas({viewingStudentId, setViewingStudentId}) {
                       setConfetti(false)
                     }, 1000)
                   }
-                return
+                  return;
+                case "requestAnnotations":
+                  sendToPeerFunc(fabricCanvas, peerDispatch)();
+                  return;
+                default:
+                  return;
               }
           })
+
+          if (viewingStudentId) {
+            requestAnnotationsFromStudent(viewingStudentId);
+          }      
     }}
     runEffect();
-  });
+  }, [viewingStudentId, canvas]);
 
   const confettiConfig = {
     angle: 90,

@@ -7,12 +7,11 @@ export default function Homepage({setViewingStudentId}) {
     const [needHelpMap, setNeedHelp] = useState({})
 
     useEffect(() => {
-      peerConnectionSubject.subscribe(connections => {
+      const peerConnectionSubscription = peerConnectionSubject.subscribe(connections => {
         setIds(Object.keys(connections));
       })
 
-      peerDataSubject.subscribe(([{type, data}, incomingPeerId])=>{
-          console.log('ello')
+      const peerDataSubscription = peerDataSubject.subscribe(([{type, data}, incomingPeerId])=>{
         switch (type) {
           case "helpRequest":
               setNeedHelp({...needHelpMap, [incomingPeerId]: data})
@@ -20,7 +19,12 @@ export default function Homepage({setViewingStudentId}) {
         }
       })
 
-    }, [])
+      return () => {
+        peerConnectionSubscription.unsubscribe();
+        peerDataSubscription.unsubscribe();
+      }
+
+    }, []);
     return (
         <table className="studentTable">
             <thead>
