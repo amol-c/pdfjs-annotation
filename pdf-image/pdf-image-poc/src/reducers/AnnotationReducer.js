@@ -22,7 +22,7 @@ export function annotationReducer(state, action) {
       saveToServer(canvas)
       return
     case 'addImage':
-      addImage()
+      addImage(canvas)
       return
     case 'increaseCanvas':
         increaseCanvas(canvas)
