@@ -25,6 +25,8 @@ export const Toolbar = (props) => {
       <div style={style}>
         <div style={{flex: 1}}></div>
         <button onClick={() => {peerDispatch({type: "sendKudos", viewingStudentId: viewingStudentId})}}>Kudos</button>
+        <div style={{flex: 1}}></div>
+        <button onClick={() => props.setViewingStudentId(null)}>Back</button>
       </div>
     );
   }

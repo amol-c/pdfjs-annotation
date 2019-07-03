@@ -138,7 +138,7 @@ let cachedStudentId;
 export function getUserIds() {
   var urlParams = new URLSearchParams(window.location.search);
   const teacherId = urlParams.get('teacherId')
-  const studentId = cachedStudentId || uuidv4()
+  const studentId = urlParams.get('studentId') || cachedStudentId || uuidv4()
   cachedStudentId = studentId;
 
   const isTeacher = urlParams.get('isTeacher') === "true"
@@ -146,6 +146,8 @@ export function getUserIds() {
   const viewingStudentId = urlParams.get('viewingStudentId');
   return [teacherId, studentId, isTeacher, viewingStudentId];
 }
+
+
 
 function setupTeacherConnections() {
   peer.on('connection', function(connection) {

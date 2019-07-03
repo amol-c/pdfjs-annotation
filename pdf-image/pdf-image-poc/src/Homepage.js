@@ -12,6 +12,7 @@ export default function Homepage({setViewingStudentId}) {
       })
 
       peerDataSubject.subscribe(([{type, data}, incomingPeerId])=>{
+          console.log('ello')
         switch (type) {
           case "helpRequest":
               setNeedHelp({...needHelpMap, [incomingPeerId]: data})

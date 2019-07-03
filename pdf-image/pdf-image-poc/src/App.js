@@ -12,7 +12,7 @@ import { peerReducer } from './reducers/PeerReducer';
 import Homepage from './Homepage';
 import Confetti from 'react-dom-confetti';
 
-function Canvas({viewingStudentId}) {
+function Canvas({viewingStudentId, setViewingStudentId}) {
   const initialState = {}
   const [_, dispatch] = useReducer(annotationReducer, initialState);
   const [peerState, peerDispatch] = useReducer(peerReducer, initialState);
@@ -92,7 +92,7 @@ function Canvas({viewingStudentId}) {
   
   return (
     <div className="App">
-      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} viewingStudentId={viewingStudentId} />
+      <Toolbar annotationDispatch={dispatch} fabricCanvas={canvas} peerDispatch={peerDispatch} viewingStudentId={viewingStudentId} setViewingStudentId={setViewingStudentId} />
       <header className="App-header">
         <canvas className="A4 page" id={canvasId} width="480" height="600"></canvas>
       </header>
@@ -146,7 +146,7 @@ export default () => {
   }, [])
 
   if (!isTeacher || viewingStudentId) {
-    return <Canvas viewingStudentId={viewingStudentId} />;
+    return <Canvas viewingStudentId={viewingStudentId} setViewingStudentId={setViewingStudentId} />;
   }
 
   return <Homepage setViewingStudentId={setViewingStudentId} />
