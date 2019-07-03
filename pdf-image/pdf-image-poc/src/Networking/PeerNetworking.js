@@ -122,6 +122,14 @@ export function sendKudosToStudent(peerId) {
   console.log(`Failed to send KUDOS`)
 }
 
+export function requestAnnotationsFromStudent(studentId) {
+  const connection = connections[studentId];
+  if (!connection) {
+    return;
+  }
+  connection.send({type: 'requestAnnotations'})
+}
+
 export function getAllStudentIds() {
   return Object.keys(connections)
 }
